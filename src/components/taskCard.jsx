@@ -1,7 +1,10 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useContext } from "react";
 import "./taskCard.css"
+import { ProjectContext } from "../store/project-context";
 
-export function TaskCard({item, onDelete, onSave}) {
+export function TaskCard({item}) {
+    const {onDelete,onSave} = useContext(ProjectContext);
+    
     const [IsEditing,setIsEditing] = useState(false);
     const titleRef = useRef();
     const descriptionRef = useRef();

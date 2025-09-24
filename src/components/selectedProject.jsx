@@ -6,8 +6,6 @@ export function SelectedProject({
   selectedProject,
   selectedProjectTasks,
   onTaskAdd,
-  onTaskDelete,
-  onTaskEdit
 }) {
   const taskTitleRef = useRef();
   const taskDescriptionRef = useRef();
@@ -47,17 +45,11 @@ export function SelectedProject({
           </div>
         </form>
 
-        {selectedProjectTasks.map((item) => {
+        {selectedProjectTasks.length === 0 && <h1 className="text-center">Add Tasks for this Project</h1>}
+        {selectedProjectTasks.length > 0 && selectedProjectTasks.map((item) => {
           return (
             <>
-                <TaskCard item={item} onDelete={onTaskDelete} ></TaskCard>
-            </>
-        );
-        }).length === 0 && <h1 className="text-center">Add Tasks for this Project</h1>}
-        {selectedProjectTasks.map((item) => {
-          return (
-            <>
-                <TaskCard item={item} onDelete={onTaskDelete} onSave={onTaskEdit} ></TaskCard>
+                <TaskCard key={item.taskId} item={item} ></TaskCard>
             </>
         );
         })}

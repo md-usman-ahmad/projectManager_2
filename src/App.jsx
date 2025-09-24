@@ -4,6 +4,8 @@ import { NewProject } from "./components/newProject.jsx";
 import { SelectedProject } from "./components/selectedProject.jsx";
 import { useState } from "react";
 
+import {ProjectContext} from "./store/project-context.js"
+
 export function App() {
   const [projectState, setProjectState] = useState({
     projects: [],
@@ -112,8 +114,8 @@ export function App() {
   if (projectState.selectedProjectId === null) {
     content = (
       <NewProject
-        onClickCancelbtn={handleonClickCancelbtn}
         onAddingProject={handleOnAddingProject}
+        onClickCancelbtn={handleonClickCancelbtn}
       ></NewProject>
     );
   }
@@ -133,7 +135,6 @@ export function App() {
         selectedProject={selectedProject}
         selectedProjectTasks={selectedProjectTasks}
         onTaskAdd={handleOnTaskAdd}
-        onTaskDelete={handleOnTaskDelete}
         onTaskEdit={handleOnTaskEdit}
       ></SelectedProject>
     );
@@ -141,12 +142,20 @@ export function App() {
 
   return (
     <>
+    <ProjectContext value={{
+        projects: projectState.projects,
+        tasks: projectState.tasks,
+        selectedProjectId: projectState.selectedProjectId,
+        onDelete: handleOnTaskDelete,
+        onSave: handleOnTaskEdit
+    }}>
       <Sidebar
-        onClickAddProject={handleOnClickAddProject}
         projects={projectState.projects}
+        onClickAddProject={handleOnClickAddProject}
         onClickingProjects={handleOnClickingProjects}
-      ></Sidebar>
+        ></Sidebar>
       {content}
+    </ProjectContext>
     </>
   );
 }
