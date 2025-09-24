@@ -1,0 +1,1 @@
+This application allows users to create and manage multiple projects, with each project containing its own set of tasks (to-do list). Users can easily add, edit, and delete both projects and their associated tasks. Additionally, the application provides a search functionality to quickly find specific projects or tasks.
