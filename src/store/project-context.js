@@ -1,4 +1,4 @@
-import { createContext } from "react";
+import { createContext, useReducer } from "react";
 
 import { Sidebar } from "../components/sidebar.jsx";
 import { HomePage } from "../components/homepage.jsx";
@@ -17,113 +17,169 @@ export const ProjectContext = createContext({
 
 export function ProjectContextProvider(){
     
-  const [projectState, setProjectState] = useState({
+  // const [projectState, setProjectState] = useState({
+  //   projects: [],
+  //   tasks: [],
+  //   selectedProjectId: undefined,
+  // });
+
+  function reducerfn(projectState,action){
+    console.log("projectState reducerfn = ",projectState);
+    if(action.type === "handleOnClickAddProject"){
+        return {
+          ...projectState,
+          selectedProjectId: null,
+        };
+    } else if(action.type === "handleonClickCancelbtn"){
+        return {
+          ...projectState,
+          selectedProjectId: undefined,
+      };
+    } else if(action.type === "handleOnAddingProject"){
+      if(action.payload.projectTitle !== '' || action.payload.projectDescription !== ''){
+          return {
+            ...projectState,
+            projects: [
+              ...projectState.projects,
+              {
+                projectId: projectState.projects.length + 1,
+                title: action.payload.projectTitle,
+                description: action.payload.projectDescription,
+                createdAt: new Date().toLocaleString().slice(0, 19),
+              },
+            ],
+            selectedProjectId: projectState.projects.length + 1,
+          };
+      } else {
+        alert("Fill all the above fields ")
+        return projectState
+      }
+      
+    } else if(action.type === "handleOnClickingProjects"){
+        return {
+            ...projectState,
+            selectedProjectId : action.payload.clickedProjectId
+        }
+    } else if(action.type === "handleOnTaskAdd"){ 
+      if(action.payload.taskTitle !== '' || action.payload.taskDescription !== ''){
+          return {
+            ...projectState,
+            tasks: [
+              ...projectState.tasks,
+              {
+                taskId: projectState.tasks.length + 1,
+                title: action.payload.taskTitle,
+                description: action.payload.taskDescription,
+                createdAt: new Date().toLocaleString().slice(0, 19),
+                projectId: action.payload.projectId
+              },
+            ],
+          };
+      } else {
+        alert("Fill all the fields above")
+        return projectState
+      }
+    } else if(action.type === "handleOnTaskDelete"){
+      return {
+            ...projectState,
+            tasks: projectState.tasks.filter( (task)=>{
+                if((task.projectId !== action.payload.projectId) || (task.taskId !== action.payload.taskId)) return task
+            })
+        }
+    } else if(action.type === "handleOnTaskEdit"){
+      return {
+          ...projectState,
+          tasks: projectState.tasks.map( (item)=>{
+              if(item.projectId === action.payload.projectId && item.taskId === action.payload.taskId){
+                  const updatedTask={
+                      ...item,
+                      title: action.payload.newTitle,
+                      description: action.payload.newDescription,
+                      updatedAt: new Date().toLocaleString().slice(0, 19)
+                  }
+                  return updatedTask;
+              }
+              return item
+          })
+      }
+    } else {
+      return {
+        ...projectState
+      }
+    }
+  }
+  const [projectState, dispatch] = useReducer(reducerfn,{
     projects: [],
     tasks: [],
     selectedProjectId: undefined,
   });
   console.log("projectState = ", projectState);
-  let content;
 
+
+  let content;
   function handleOnClickAddProject() {
-    setProjectState((prevState) => {
-      return {
-        ...prevState,
-        selectedProjectId: null,
-      };
-    });
+    dispatch({
+      type: "handleOnClickAddProject",
+    })
   }
   function handleonClickCancelbtn() {
-    setProjectState((prevState) => {
-      return {
-        ...prevState,
-        selectedProjectId: undefined,
-      };
-    });
+    dispatch({
+      type: "handleonClickCancelbtn"
+    })
   }
+
   function handleOnAddingProject(projectTitle, projectDescription) {
-    if(projectTitle !== '' || projectDescription !== ''){
-      setProjectState((prevState) => {
-        return {
-          ...prevState,
-          projects: [
-            ...prevState.projects,
-            {
-              projectId: prevState.projects.length + 1,
-              title: projectTitle,
-              description: projectDescription,
-              createdAt: new Date().toLocaleString().slice(0, 19),
-            },
-          ],
-          selectedProjectId: prevState.projects.length + 1,
-        };
-      });
-    } else {
-      alert("Fill all the fields above")
-    }
-    
+    dispatch({
+      type : "handleOnAddingProject",
+      payload : {
+        projectTitle,
+        projectDescription
+      }
+    })
   }
   function handleOnClickingProjects(clickedProjectId){
-    setProjectState((prevState)=>{
-        return {
-            ...prevState,
-            selectedProjectId : clickedProjectId
-        }
+    dispatch({
+      type:"handleOnClickingProjects",
+      payload: {
+        clickedProjectId
+      }
     })
   }
   function handleOnTaskAdd(projectId, taskTitle,taskDescription) {
-    if(taskTitle !== '' || taskDescription !== ''){
-      setProjectState((prevState) => {
-        return {
-          ...prevState,
-          tasks: [
-            ...prevState.tasks,
-            {
-              taskId: prevState.tasks.length + 1,
-              title: taskTitle,
-              description: taskDescription,
-              createdAt: new Date().toLocaleString().slice(0, 19),
-              projectId,
-            },
-          ],
-        };
-      });
-    } else {
-      alert("Fill all the fields above")
-    }
+    dispatch({
+      type: "handleOnTaskAdd",
+      payload : {
+        projectId,
+        taskTitle,
+        taskDescription
+      }
+    })
   }
+
   function handleOnTaskDelete(projectId,taskId){
     console.log("projectId = ",projectId);
     console.log("taskId = ",taskId);
-    setProjectState( (prevState)=>{
-        return {
-            ...prevState,
-            tasks: prevState.tasks.filter( (task)=>{
-                if((task.projectId !== projectId) || (task.taskId !== taskId)) return task
-            })
+      dispatch({
+        type : "handleOnTaskDelete",
+        payload : {
+          projectId,
+          taskId
         }
-    })
+      })
   }
   function handleOnTaskEdit(newTitle,newDescription,projectId,taskId){
     console.log("newTitle = ",newTitle);
     console.log("newDescription = ",newDescription);
-    setProjectState((prevState)=>{
-        return {
-            ...prevState,
-            tasks: prevState.tasks.map( (item)=>{
-                if(item.projectId === projectId && item.taskId === taskId){
-                    const updatedTask={
-                        ...item,
-                        title: newTitle,
-                        description: newDescription,
-                        updatedAt: new Date().toLocaleString().slice(0, 19)
-                    }
-                    return updatedTask;
-                }
-                return item
-            })
-        }
+    dispatch({
+      type : "handleOnTaskEdit",
+      payload : {
+        newTitle,
+        newDescription,
+        projectId,
+        taskId
+      }
     })
+        
   }
 
   if (projectState.selectedProjectId === undefined) {
